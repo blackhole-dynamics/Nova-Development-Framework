@@ -4,7 +4,9 @@ All notable changes to the Nova Development Framework will be documented in this
 
 ## [Unreleased]
 
-No unreleased changes recorded yet.
+### Fixed
+
+- fix(neutrality): neutralize the legacy person-specific Human-Maintainer commit-control field in `framework/templates/work-packages/WORK_PACKAGE_TYPE_FIELD.md` as `requires_human_maintainer_commit`; commit authority and Work-Package semantics are unchanged. No NDF parser, schema, prompt, skill, or other tracked consumer references the legacy key. Adopters that copied or parse the exact pre-fix template field should migrate to the role-neutral key. Public-Neutrality enforcement remains unchanged; ADR-0031 compatibility policy is not relaxed.
 
 ## [1.1.0] - 2026-09-23
 

@@ -11,7 +11,7 @@ work_package:
   forbidden_files: []
   tests_required: ""
   requires_nova_review: true
-  requires_kay_commit: true
+  requires_human_maintainer_commit: true
 ```
 
 ## Allowed Types
