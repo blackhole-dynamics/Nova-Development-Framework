@@ -41,7 +41,8 @@ No fixed block count: never add a parallel block the prompt did not ask for, and
 When a next step or handoff is produced, include or fit in (cf. the [`SESSION_HANDOFF` template](../../../docs/templates/SESSION_HANDOFF_TEMPLATE.md)):
 
 - the next authorised action — never pre-start a WP that still awaits acceptance;
-- the session for the next step — exactly one `SESSION` value, with a reason unless `SAME_SESSION_ALLOWED`;
+- the active contract the next step builds on — contract ID / revision, `STATUS`, `SUPERSEDES` for a replacement, and the repository revision — so the resumption can run the freshness check (Execution Contract, Rule 5);
+- the session for the next step — exactly one `SESSION` value with a task-specific reason for every value, plus the matching German session notice as a separate line (Execution Contract, Rule 1);
 - the recommended prompt profile / budget — escalated on any fail-closed trigger;
 - a do-not-reload list;
 - forbidden work;

@@ -15,10 +15,12 @@ Escalate context budget when scope, safety, release, ADR, privacy or compatibili
 ```text
 WP-ID / Titel:
 SESSION:          # SAME_SESSION_ALLOWED | SAME_SESSION_RECOMMENDED | NEW_SESSION_RECOMMENDED | NEW_SESSION_REQUIRED
-SESSION REASON:   # required unless SAME_SESSION_ALLOWED
+SESSION REASON:   # required for every SESSION value — task-specific, never generic
 STATUS:           # COMPLETE | COMPLETE REPLACEMENT
 SUPERSEDES:       # COMPLETE REPLACEMENT only — do not merge with earlier versions
 Prompt profile: Lean (B1)   # escalate on any fail-closed trigger
+
+Neue Session nötig?   # separate German session notice outside the header — exact wording for the SESSION value (Execution Contract, Rule 1)
 
 1. Ziel:
 2. Scope:
@@ -46,5 +48,5 @@ Referenzierte Standardregeln (nicht wiederholen):
 
 - Use Lean only when no elevated complexity or criticality applies. For release, ADR, security policy, v1.x-compatibility, breaking-change, migration, privacy/permission, unclear scope, contradictory sources → escalate to Standard/Full.
 - Select only the skills required (B1: 1–3). Do not force all 38 skills.
-- Execution header and replacement semantics: [Execution Contract](../../framework/prompts/blocks/BLOCK_EXECUTION_CONTRACT.md) (NDF-WP-153). A corrected prompt is re-issued in full as `COMPLETE REPLACEMENT` with `SUPERSEDES`, never as a delta. Complete ≠ verbose: fill the fields, reference the stable rules.
+- Execution header and replacement semantics: [Execution Contract](../../framework/prompts/blocks/BLOCK_EXECUTION_CONTRACT.md) (NDF-WP-153, hardened by NDF-WP-169). `SESSION REASON` is required for every value and names the task-specific factor; the German session notice stays a separate line outside the header and must match `SESSION`. A corrected prompt is re-issued in full as `COMPLETE REPLACEMENT` with `SUPERSEDES`, never as a delta. Complete ≠ verbose: fill the fields, reference the stable rules.
 - No secrets, no private data, no private project names or domains.
