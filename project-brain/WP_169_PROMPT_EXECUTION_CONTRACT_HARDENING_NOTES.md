@@ -47,3 +47,18 @@ Ursprünglicher Durchlauf: `AGENT_COMPLETE` — kein `HUMAN_APPROVED`, kein Comm
 ## Verbotene vorzeitige Aktionen
 
 Staging/Commit/Push/Tag/Release durch einen Agenten; Lock- oder Digest-Aktualisierung; Änderung an `.agents/**`, ADRs, Scripts, Roadmap oder `ndf-work-package-runner`; Start von WP-162 oder einem anderen WP.
+
+## Post-Acceptance Reconciliation – NDF-WP-170
+
+> Additiv angefügt durch NDF-WP-170 (2026-11-03). Die obigen Abschnitte bleiben unverändert als historischer Stand; ihre Aussagen „ausstehend“ beschreiben den Zustand vor der Annahme. Dieser Abschnitt hält den danach eingetretenen Zustand fest.
+
+- **Ursprünglicher Stand:** Implementierung `AGENT_COMPLETE`; Nova-Votum darauf `REWORK_REQUIRED – DOCUMENTATION & EVIDENCE ONLY`; Corrective Pass CP01 (nur Dokumentation und Evidenz) ausgeführt.
+- **Abschließendes Nova-Votum:** `GO_WITH_NOTES` (Angabe des Human Maintainers im WP-170-Vertrag; kein eigenständiges Votum-Dokument im Repository).
+- **Human-Maintainer-Entscheidung:** WP-169 `ACCEPTED WITH NOTES`; CP01 `ACCEPTED`.
+- **Commit:** `24760c4315a02e26d61b17cc43eece56e52579d9` („docs(governance): harden prompt execution contract (WP-169)“, 2026-11-02); Commit-Body: „Human Maintainer decision: ACCEPTED WITH NOTES; CP01: ACCEPTED.“
+- **Push:** `origin/main` = `24760c4` (lesend über `git ls-remote` am 2026-11-03 bestätigt).
+- **Public Quality Gate (GitHub):** Workflow „Public Quality Gate“, Ereignis `push`, `headSha` = `24760c4…`, Ergebnis `success` (lesend über `gh run list` am 2026-11-03 bestätigt).
+- **Kein Release:** WP-169 begründet keinen Release, keinen Tag und keine Release-Vorbereitung.
+- **Wirksamkeit:** Die WP-169-Regeln gelten prospektiv für Anweisungen, die nach der Human-Maintainer-Annahme verfasst werden.
+- **Weiterhin geltende Accepted Notes:** Consumer-Integritätsdrift (bedingt; Existenz von Consumer-Locks nicht festgestellt); `ndf-work-package-runner` nennt Session-Hinweis und Rule 5 nicht; `.agents/skills/` weicht in vier Skills ab (keine historische Hash-Baseline vor WP-169); keine ausgeführten Agenten-Verhaltens- oder Cross-Host-Tests; lokale Gates ohne Denylist.
+- **Quellenpriorität:** Annahmegrundlage sind die Human-Maintainer-Entscheidung und der verifizierte Commit. Ein Commit-Body allein ersetzt keine zukünftige Human-Maintainer-Freigabe.

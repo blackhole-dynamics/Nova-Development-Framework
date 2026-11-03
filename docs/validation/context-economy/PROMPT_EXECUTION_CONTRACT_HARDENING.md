@@ -175,3 +175,24 @@ Trigger: Nova verdict `REWORK_REQUIRED – DOCUMENTATION & EVIDENCE ONLY`; the n
 | F-169-04 | Documentary PASS vs. `NOT_VERIFIABLE` agent behaviour kept; summary clarified; no new behaviour tests, no cross-host claim | §6 |
 
 CP01 changed no normative rule, template, skill, ADR, script, or `.agents/**` file. It is neither a Nova verdict nor an acceptance.
+
+## 14. Post-Acceptance Evidence – NDF-WP-170 Reconciliation
+
+> Appended additively by NDF-WP-170 (2026-11-03). Sections 1–13 stay unchanged as the historical record; their "pending" statements describe the state before acceptance.
+
+| Item | Evidence | Verification |
+|---|---|---|
+| Human-Maintainer acceptance | WP-169 `ACCEPTED WITH NOTES`; CP01 `ACCEPTED`; final Nova verdict `GO_WITH_NOTES` | acceptance: Human-Maintainer statement in the WP-170 contract and commit body of `24760c4`; Nova verdict: Human-Maintainer statement only (no verdict document in the repository) |
+| Commit | `24760c4315a02e26d61b17cc43eece56e52579d9` — "docs(governance): harden prompt execution contract (WP-169)", 2026-11-02 | `git log` (read-only) |
+| Push | `origin/main` = `24760c4` | `git ls-remote origin refs/heads/main` (read-only), 2026-11-03 |
+| GitHub CI | Workflow "Public Quality Gate", event `push`, head SHA `24760c4…`, conclusion `success` | `gh run list --commit` (read-only), 2026-11-03 |
+| Release | none — WP-169 authorises no release, tag, or release preparation | — |
+
+Unchanged by this reconciliation:
+
+- **Test limits:** the 17 cases of §6 remain a documentary rule-conformance analysis — 17/17 PASS for the rule check, 17/17 `NOT_VERIFIABLE` for agent behaviour. They are not re-assessed retroactively, and no agent-behaviour or cross-host test is added or claimed.
+- **Normative rules:** no WP-169 rule, template, skill, or ADR is changed; the Execution Contract stays the single normative source.
+- **Limitations (§7, §9.2, §10):** they remain in force as accepted notes; the CI run used the repository's configured denylist setting, which this document does not inspect.
+- **Effect:** the WP-169 obligations apply prospectively to instructions authored after the Human-Maintainer acceptance.
+
+The acceptance basis is the Human-Maintainer decision together with the verified commit; a commit body alone is not a general substitute for any future Human-Maintainer approval.
