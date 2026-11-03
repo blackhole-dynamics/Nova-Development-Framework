@@ -63,4 +63,4 @@ Weitere Security-Prompts / more security prompts: `security/` (siehe / see `docs
 - `blocks/BLOCK_LIMITS.md`
 - `blocks/BLOCK_QUALITY_RULES.md`
 - `blocks/BLOCK_FEEDBACK_TO_NOVA.md`
-- `blocks/BLOCK_EXECUTION_CONTRACT.md` — execution contract (NDF-WP-153): execution header, session declaration, complete execution instructions, complete replacements, prompt-over-Skill output precedence; hardened by NDF-WP-169 (session reason for every value, German session notice, replacement re-assessment and scope guard, handoff freshness)
+- `blocks/BLOCK_EXECUTION_CONTRACT.md` — execution contract (NDF-WP-153): execution header, session declaration, complete execution instructions, complete replacements, prompt-over-Skill output precedence; hardened by NDF-WP-169 (session reason for every value, German session notice, replacement re-assessment and scope guard, handoff freshness); extended by NDF-WP-167 (Rule 6 – Execution Evidence: reliable, risk-tiered evidence E1/E2/E3)

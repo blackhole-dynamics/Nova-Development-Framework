@@ -1,6 +1,6 @@
 # Prompt Block – Execution Contract
 
-> NDF-WP-153 — Prompt Execution Contract Baseline; hardened by NDF-WP-169 (session reason and notice, replacement re-assessment, handoff freshness). Docs-only governance rule: no runtime, tooling, or enforcement machinery.
+> NDF-WP-153 — Prompt Execution Contract Baseline; hardened by NDF-WP-169 (session reason and notice, replacement re-assessment, handoff freshness); extended by NDF-WP-167 (Rule 6 – Execution Evidence). Docs-only governance rule: no runtime, tooling, or enforcement machinery.
 > Sprachstatus: EN mit deutscher Kernaussage. / English with a German key statement.
 
 **Kernaussage:** Jede Ausführungsanweisung ist ein vollständiger, eigenständiger aktiver Vertrag — nach jeder Korrektur vollständig neu ausgegeben, nie als Delta.
@@ -85,6 +85,23 @@ COMPLETE WITHIN AUTHORIZED SCOPE != REPEAT THE WHOLE PROJECT WORKFLOW
 - A changed repository revision is not automatically `BLOCKED`: it requires a traceable freshness and scope check (what changed, and whether it touches the contract's files, sources, or assumptions). A material deviation → `BLOCKED` with a report; otherwise continue and record the check.
 - A superseded, no longer valid, or conflicting contract is never executed silently → STOP / `BLOCKED`; request the current contract or a `COMPLETE REPLACEMENT`.
 - This rule adds no runtime and no automatic session management.
+
+## Rule 6 – Execution Evidence
+
+> NDF-WP-167. Format and illustrative tier examples: [Evidence Pack](../../../docs/guides/TOKEN_EFFICIENCY_AND_CONTEXT_BUDGET_BASELINE.md#12-evidence-pack) (guide §12).
+
+- **Reliable results:** every executed check reports a traceable result. For a process check, the available exit status is captured directly and unaltered (e.g. not masked by a pipeline); success text alone is no reliable process evidence. Non-process checks (reading, link resolution, hash comparison) use an equivalent traceable method.
+- **Kinds of check, kept apart:** documentary rule check · executed test · observed agent behaviour · check not run (with reason) · claim not verifiable. A documentary check is never reported as an executed or behaviour test → otherwise `REWORK`.
+- **Sources:** an evidential statement names its source class where it is not self-evident (e.g. direct tool output, repository document, Human-Maintainer statement). A relayed statement is valid as what it is — never as independent verification.
+- **Integrity:** an "unchanged" claim names its comparison basis. A hash comparison proves equal content at the compared points in time, not the absence of intermediate writes; historical unchanged state is claimed only against a historical baseline. A reproducible list hash (method stated) may cover a large protected area. Without a basis, the claim is reported as an evidence limit, not as fact.
+- **Evidence Tiers:** `E1 – Basis` · `E2 – Regulär` · `E3 – Erweitert` set the required evidence scope by actual risk. Normative minimum assignment: **E1** – minor, non-normative change without relevant security, compatibility, release, or elevated integrity risk; **E2** – normal work package or bounded correction that does not clearly fall under E1 and has no E3 risk factor; **E3** – change with relevant normative, security, compatibility, release-critical, or elevated integrity effect. The highest applicable risk factor decides; guide §12.1 gives illustrative examples only, never a further trigger. A missing tier is derived and named with its reason; a tier declared below the actual risk waives no required evidence → `REWORK`. The tier is stated in the contract body or the result, not in the execution header. Tiers are independent of budgets B0–B4, prompt modes, and profiles.
+- **Proportionality:** evidence matches the risk and the specific claim; no universal duty to provide full logs, repository-wide hash lists, or a particular tool. A claim asserted as established without the evidence its tier requires → `REWORK`. A bounded append-only change needs a prefix proof for its unchanged-prefix claim but does not by itself trigger E3.
+- **Self-reference:** after-hashes and after-state integrity of a file may be recorded in a separately referenced closing report; no file has to contain its own final hash.
+- **Local checks and CI:** local gates and CI are distinct evidence sources. A local strict pass without a configured neutrality denylist is no complete neutrality evidence; a future CI result is never anticipated. Post-push CI evidence is recorded in the Human-Maintainer closure or, where needed, in a separately authorised reconciliation step — no automatic extra work package.
+- **Security:** no confidential denylist terms or sensitive log content in public evidence. A failed neutrality check is reported with sanitised but sufficient detail; sanitising never hides that the check failed.
+- **Host neutrality:** no universal duty to use a specific shell, exit-code variable, interpreter, CLI, or hash tool; evidence quality decides, not the host method. A prompt that makes one host method a universal NDF obligation → `REWORK`.
+- **Authority unchanged:** agent completion, Nova review, Human-Maintainer acceptance, commit, push, and CI stay separate states; an Evidence Tier never replaces a Human-Maintainer gate (`EVIDENCE != AUTHORITY`).
+- **Prospective transition:** Rule 6 applies to execution instructions and results authored after the formal Human-Maintainer acceptance of the completed NDF-WP-167; earlier work is judged by the rules in force when it was authored. Rules 1–5, the execution header, and the review verdicts are unchanged; no new status or error code is introduced.
 
 ## Authority and fail-closed
 

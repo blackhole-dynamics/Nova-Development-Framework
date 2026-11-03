@@ -110,18 +110,38 @@ A ≤ 1-page status extract that replaces re-reading long context packs at sessi
 
 ## 12. Evidence Pack
 
-A compact review input that avoids raw logs while staying verifiable:
+A compact review input that avoids raw logs while staying verifiable. The evidence obligations are normative only in the [Execution Contract, Rule 6 – Execution Evidence](../../framework/prompts/blocks/BLOCK_EXECUTION_CONTRACT.md) (NDF-WP-167); this section gives the format, and §12.1 illustrates how the tiers typically apply.
 
 ```markdown
 ## Evidence Pack
 
+Evidence tier:        # E1 – Basis | E2 – Regulär | E3 – Erweitert — declared or derived, with reason
 Relevant files:
 Relevant diffs:
-Checks run:
-Acceptance criteria:
+Checks run:           # command or method · actual result (exit status for process checks) · kind of check
+Checks not run:       # check · reason
+Scope / integrity:    # comparison basis · what it proves · what it does not
+Acceptance criteria:  # met / not met
 Known risks:
 Open questions:
+Evidence limits:      # source classes, unverified claims, local vs. CI
 ```
+
+The six original fields stay. NDF-WP-167 adds `Evidence tier`, `Checks not run`, `Scope / integrity`, and `Evidence limits`; a field that does not apply may be marked `n/a` (typical at E1).
+
+### 12.1 Evidence Tiers
+
+The normative minimum assignment of E1/E2/E3 is defined only in [Rule 6 – Execution Evidence](../../framework/prompts/blocks/BLOCK_EXECUTION_CONTRACT.md) (*Evidence Tiers*). The table is illustrative: its examples show typical cases and the evidence a tier usually adds; it is no separate trigger source, and where an example and Rule 6 diverge, Rule 6 decides.
+
+| Tier | Illustrative example (assignment: Rule 6) | Evidence, in addition to the lower tier where applicable | Not required |
+|---|---|---|---|
+| **E1 – Basis** | e.g. typo, link fix, small editorial change | evidence that fits the change (e.g. the diff and a direct check of the edited place) | general before/after hashes · environment details · full logs |
+| **E2 – Regulär** | e.g. a regular docs work package or a bounded correction without an E3 risk factor | relevant repository revision · traceable scope check · the project-appropriate quality gates actually run, with reliable process results · short note on the relevant test environment · open evidence limits | a specific NDF script in consumer projects — project-appropriate gates are sufficient |
+| **E3 – Erweitert** | e.g. a new or changed normative contract rule, a compatibility-relevant change, release preparation, a security-relevant change | targeted before/after integrity evidence · check of protected areas · differentiated kind and coverage of tests · explicit "not verified" statements · prefix proof for relevant append-only claims | a repository-wide full-hash duty · full logs |
+
+The highest applicable risk factor decides; under-declaration, derivation of a missing tier, and proportionality follow Rule 6. An E3 result still stays compact: it adds the evidence the risk needs, not volume.
+
+**Distinction.** Evidence Tiers are not context budgets: there is no mapping `B0 → E1`, `B2 → E2`, or `B4 → E3`; a small prompt can need E3, and a large one can stay E2. Tiers are equally independent of prompt modes and profiles, of the governance-tier candidate WP-164 (not activated), of the evidence-strength ratings used in reviews (e.g. "evidence level strong"), and of source classes: a tier fixes the *required* evidence scope in advance; a strength rating evaluates *existing* evidence afterwards.
 
 ## 13. Short Report Format
 
@@ -132,7 +152,7 @@ For B0/B1 WPs, replacing the 15–17-section report where it is not required:
 
 Result:
 Changed files:
-Evidence:
+Evidence:        # Evidence tier + key results, or a reference to the Evidence Pack (§12)
 Risks:
 Open questions:
 Next step:
@@ -140,6 +160,8 @@ Compact Context Summary:
 ```
 
 Rule: B0/B1 do not automatically produce a 15–17-section report; the full report stays allowed and mandatory for B3/B4; review quality must not drop.
+
+`Evidence:` states the Evidence Tier and the decisive results, or refers to the relevant Evidence Pack; a short report never duplicates a full evidence block that already exists (NDF-WP-167).
 
 ## 14. Skill selection rule
 
@@ -183,3 +205,5 @@ Pilot archetype: **operations-oriented consumer project** (neutral; no private p
 **GO WITH NOTES – token efficiency and context budget baseline implemented.** Additive and docs-only; no new skills; no skill removal/renaming; no tool requirement; no MCP/API/OAuth/network; Lean is the new preferred normal case but fail-closed; B4 is exceptional, not standard; project-local pilot recommended; v1.1 stays planning only (no scope lock, no release prep). Next: Human-Maintainer commit, then run the project-local pilot before any NDF-core hardening.
 
 *Status update (NDF-WP-153):* WP-152 is committed (`c4c1c34`); real project-local pilot evidence informed the follow-up [Execution Contract](../../framework/prompts/blocks/BLOCK_EXECUTION_CONTRACT.md) (WP-153). Current sequence: [v1.1 plan](../roadmap/V1_1_PLAN.md).
+
+*Status update (NDF-WP-167):* §12 (Evidence Pack fields, §12.1 Evidence Tiers) and §13 (`Evidence:` field) were extended for [Rule 6 – Execution Evidence](../../framework/prompts/blocks/BLOCK_EXECUTION_CONTRACT.md). The extension applies prospectively from the Human-Maintainer acceptance of NDF-WP-167; the WP-152 decision above and evidence packs authored earlier stay valid as written.
