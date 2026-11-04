@@ -29,7 +29,9 @@ Usage:
 from __future__ import annotations
 
 import argparse
+import contextlib
 import fnmatch
+import io
 import os
 import subprocess
 import sys
@@ -85,6 +87,11 @@ README_REQUIRED_TERMS = [
 
 ENV_DENYLIST_VAR = "NDF_PUBLIC_NEUTRALITY_DENYLIST"
 LOCAL_DENYLIST_FILE = Path(".ndf") / "public-neutrality-terms.local.txt"
+
+# Generic neutrality finding text. It must never carry the matched term, the
+# file path or the line number: denylist terms are confidential, and gate
+# output ends up in public CI logs (NDF-WP-171, G-14 F-1/F-8).
+NEUTRALITY_MATCH_MESSAGE = "neutrality: denylist match detected"
 
 INFO = "INFO"
 WARNING = "WARNING"
@@ -195,11 +202,15 @@ def load_denylist(root: Path, env: dict[str, str] | None = None) -> tuple[list[s
 # ---------------------------------------------------------------------------
 
 def scan_files_for_terms(root: Path, rel_paths: list[str], terms: list[str]) -> list[Finding]:
-    """Case-insensitive substring scan of text files for denylisted terms."""
+    """Case-insensitive substring scan of text files for denylisted terms.
+
+    One finding per (line, term) match. The finding carries only the generic
+    NEUTRALITY_MATCH_MESSAGE; terms are used for matching only.
+    """
     findings: list[Finding] = []
     if not terms:
         return findings
-    lowered = [(t, t.lower()) for t in terms]
+    lowered = [t.lower() for t in terms]
     for rel in rel_paths:
         if not is_scannable(rel):
             continue
@@ -210,14 +221,11 @@ def scan_files_for_terms(root: Path, rel_paths: list[str], terms: list[str]) -> 
             text = path.read_text(encoding="utf-8", errors="replace")
         except OSError:
             continue
-        for lineno, line in enumerate(text.splitlines(), start=1):
+        for line in text.splitlines():
             line_lower = line.lower()
-            for term, term_lower in lowered:
+            for term_lower in lowered:
                 if term_lower in line_lower:
-                    findings.append(Finding(
-                        ERROR,
-                        f"neutrality: denylisted term '{term}' found in {rel}:{lineno}",
-                    ))
+                    findings.append(Finding(ERROR, NEUTRALITY_MATCH_MESSAGE))
     return findings
 
 
@@ -386,7 +394,16 @@ def self_test() -> int:
         )
         hits = scan_files_for_terms(root, ["docs/sample.md"], ["PRIVATE_PROJECT_A"])
         expect(len(hits) == 1 and hits[0].level == ERROR, "neutrality scan hit")
-        expect("docs/sample.md:2" in hits[0].message, "neutrality scan location")
+        expect(bool(hits) and hits[0].message == NEUTRALITY_MATCH_MESSAGE,
+               "neutrality finding uses the generic message")
+        expect(not any("sample.md" in h.message or ":2" in h.message
+                       or "private_project_a" in h.message.lower() for h in hits),
+               "neutrality finding carries no term, path or line")
+        # file attribution via controlled input lists (no path in the message)
+        (root / "docs" / "clean.md").write_text("Nothing to see here.\n",
+                                                encoding="utf-8")
+        expect(scan_files_for_terms(root, ["docs/clean.md"], ["PRIVATE_PROJECT_A"]) == [],
+               "neutrality scan: negative file alone yields no hit")
 
         # 4b. new-file neutrality check: synthetic term in an untracked-like
         #     new file is detected via the merged file list
@@ -401,9 +418,16 @@ def self_test() -> int:
         expect(merged_dup == ["a.md", "b.md", "c.md"], "merge_file_lists dedupes")
         hits = scan_files_for_terms(root, merged, ["ExamplePrivateTerm"])
         expect(
-            len(hits) == 1 and "new_untracked_note.md:1" in hits[0].message,
+            len(hits) == 1 and hits[0].message == NEUTRALITY_MATCH_MESSAGE,
             "new-file neutrality check detects synthetic term in untracked-like file",
         )
+        # attribution via controlled input lists instead of the message
+        hits = scan_files_for_terms(root, ["docs/new_untracked_note.md"],
+                                    ["ExamplePrivateTerm"])
+        expect(len(hits) == 1 and hits[0].message == NEUTRALITY_MATCH_MESSAGE,
+               "new-file neutrality check: hit comes from the new file")
+        hits = scan_files_for_terms(root, ["docs/sample.md"], ["ExamplePrivateTerm"])
+        expect(hits == [], "new-file neutrality check: tracked-like file has no hit")
 
         # 4c. synthetic term ExampleInternalName in tracked-like file detected
         (root / "docs" / "tracked_like.md").write_text(
@@ -453,6 +477,70 @@ def self_test() -> int:
         expect(check_readme_content(good) == [], "readme accepts required terms")
         hits = check_readme_content("Nova Development Framework only")
         expect(len(hits) == 4, "readme flags missing terms")
+
+        # 9. NDF-WP-171 security regressions: neutrality findings never carry
+        #    the term, the path or the line; matching and counting unchanged.
+        #    Synthetic terms only; they occur in no other fixture content.
+        term_a, term_b = "QzxSyntheticAlpha", "QzxSyntheticBeta"
+        sec = root / "sec"
+        sec.mkdir()
+
+        def scan(name: str, content: str, terms: list[str]) -> list[Finding]:
+            (sec / name).write_text(content, encoding="utf-8")
+            return scan_files_for_terms(root, [f"sec/{name}"], terms)
+
+        def leaks(found: list[Finding], *needles: str) -> bool:
+            for f in found:
+                text = f"{f.message}\n{f!r}".lower()
+                if any(n.lower() in text for n in needles):
+                    return True
+            return False
+
+        # single hit, case variant, substring
+        hits = scan("single.md", f"plain\nsee {term_a} here\n", [term_a])
+        expect(len(hits) == 1 and hits[0].message == NEUTRALITY_MATCH_MESSAGE,
+               "wp171: single hit, generic message")
+        hits = scan("case.md", f"{term_a.upper()}\n", [term_a])
+        expect(len(hits) == 1, "wp171: case-insensitive match kept")
+        hits = scan("substr.md", f"pre{term_a.lower()}post\n", [term_a])
+        expect(len(hits) == 1, "wp171: substring match kept")
+        # counting: one finding per (line, term) pair
+        hits = scan("same_twice.md", f"{term_a} and {term_a}\n", [term_a])
+        expect(len(hits) == 1, "wp171: same term twice in one line -> 1")
+        hits = scan("two_terms.md", f"{term_a} and {term_b}\n", [term_a, term_b])
+        expect(len(hits) == 2, "wp171: two terms in one line -> 2")
+        hits = scan("multi_line.md", f"{term_a}\nclean\n{term_a}\n{term_a}\n", [term_a])
+        expect(len(hits) == 3, "wp171: same term on three lines -> 3")
+        expect(not leaks(hits, term_a, "multi_line", "sec/", ":1", ":3", ":4"),
+               "wp171: no term, path or line in multi-line findings")
+        # sensitive synthetic file name
+        hits = scan(f"{term_b}_notes.md", f"mentions {term_b}\n", [term_b])
+        expect(len(hits) == 1 and not leaks(hits, term_b, "_notes"),
+               "wp171: neither term nor file name in finding")
+        # no match, empty denylist
+        expect(scan("clean.md", "nothing here\n", [term_a, term_b]) == [],
+               "wp171: no match -> no finding")
+        expect(scan_files_for_terms(root, ["sec/single.md"], []) == [],
+               "wp171: empty denylist -> no finding")
+        # finding model and representation
+        hits = scan("model.md", f"{term_a}\n", [term_a])
+        finding = hits[0] if hits else Finding(INFO, "")
+        expect(set(vars(finding)) == {"level", "message"},
+               "wp171: Finding has no additional fields")
+        expect(repr(finding) == f"[ERROR] {NEUTRALITY_MATCH_MESSAGE}",
+               "wp171: repr is '[ERROR] neutrality: denylist match detected'")
+        expect(repr(finding).count("[ERROR]") == 1, "wp171: no double [ERROR] prefix")
+        # report(): output free of term and location, count and exit code kept
+        buf = io.StringIO()
+        with contextlib.redirect_stdout(buf):
+            code = report(hits + scan("rep.md", f"x\n{term_b}\n", [term_b]), strict=False)
+        out = buf.getvalue()
+        expect(code == 1 and "2 error(s)" in out, "wp171: report counts and fails")
+        expect(out.count(f"[ERROR] {NEUTRALITY_MATCH_MESSAGE}") == 2,
+               "wp171: report prints generic findings")
+        expect(not any(n.lower() in out.lower()
+                       for n in (term_a, term_b, "model.md", "rep.md", "sec/")),
+               "wp171: report output free of term and location")
 
     if failures:
         for label in failures:
